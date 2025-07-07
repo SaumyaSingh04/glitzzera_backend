@@ -9,7 +9,15 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+    cors({
+      origin: [
+        "http://localhost:5173",
+        "https://havanafrontend-pi5p.vercel.app"
+      ],
+      credentials: true,
+    })
+  );
 app.use(express.json());
 
 // DB Connection
