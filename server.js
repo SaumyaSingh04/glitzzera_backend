@@ -13,7 +13,7 @@ app.use(
     cors({
       origin: [
         "http://localhost:5173",
-        "https://havanafrontend-pi5p.vercel.app"
+        "http://localhost:5174"
       ],
       credentials: true,
     })
