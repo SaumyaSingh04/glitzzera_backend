@@ -1,6 +1,6 @@
 import Product from "../models/product.js";
 
-// Create Product
+// ✅ Create Product
 export const createProduct = async (req, res) => {
   try {
     const {
@@ -14,6 +14,8 @@ export const createProduct = async (req, res) => {
       ratings,
       stockQty,
       is_oos,
+      category,
+      sizes
     } = req.body;
 
     const images = req.files?.images?.map((file) => file.path) || [];
@@ -30,6 +32,8 @@ export const createProduct = async (req, res) => {
       ratings,
       stockQty,
       is_oos,
+      category,
+      sizes: sizes ? JSON.parse(sizes) : [],
       images,
       video,
     });
@@ -41,20 +45,22 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// Get All Products
+// ✅ Get All Products
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.find()
+      .populate("category", "catname") // populate category name
+      .sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch products", error: error.message });
   }
 };
 
-// Get Product by ID
+// ✅ Get Product by ID
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate("category", "catname");
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     res.status(200).json(product);
@@ -63,43 +69,43 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// Update Product
+// ✅ Update Product
 export const updateProduct = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const existingProduct = await Product.findById(id);
-  
-      if (!existingProduct) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-  
-      const updateData = { ...req.body };
-  
-      // Append new images to existing ones
-      if (req.files?.images) {
-        const newImages = req.files.images.map((file) => file.path);
-        updateData.images = [...existingProduct.images, ...newImages];
-      } else {
-        updateData.images = existingProduct.images;
-      }
-  
-      // Update video if provided
-      if (req.files?.video?.[0]) {
-        updateData.video = req.files.video[0].path;
-      } else {
-        updateData.video = existingProduct.video;
-      }
-  
-      const updated = await Product.findByIdAndUpdate(id, updateData, { new: true });
-  
-      res.status(200).json({ message: "Product updated (images appended)", product: updated });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update product", error: error.message });
-    }
-  };
-  
+  try {
+    const { id } = req.params;
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) return res.status(404).json({ message: "Product not found" });
 
-// Delete Product
+    const updateData = { ...req.body };
+
+    // Convert sizes from string to object
+    if (updateData.sizes) {
+      updateData.sizes = JSON.parse(updateData.sizes);
+    }
+
+    // Append new images
+    if (req.files?.images) {
+      const newImages = req.files.images.map((file) => file.path);
+      updateData.images = [...existingProduct.images, ...newImages];
+    } else {
+      updateData.images = existingProduct.images;
+    }
+
+    // Replace video if provided
+    if (req.files?.video?.[0]) {
+      updateData.video = req.files.video[0].path;
+    } else {
+      updateData.video = existingProduct.video;
+    }
+
+    const updated = await Product.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json({ message: "Product updated", product: updated });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update product", error: error.message });
+  }
+};
+
+// ✅ Delete Product
 export const deleteProduct = async (req, res) => {
   try {
     const deleted = await Product.findByIdAndDelete(req.params.id);

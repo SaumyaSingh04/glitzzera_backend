@@ -13,7 +13,7 @@ const router = express.Router();
 router.post(
   "/",
   upload.fields([
-    { name: "images" },         // ✅ multiple files accepted by Postman under single key
+    { name: "images" },         
     { name: "video", maxCount: 1 }
   ]),
   createProduct
