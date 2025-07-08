@@ -10,10 +10,23 @@ const storage = new CloudinaryStorage({
     public_id: `${Date.now()}-${file.originalname}`,
     resource_type: file.mimetype.startsWith("video") ? "video" : "image",
     transformation: file.mimetype.startsWith("video")
-      ? [] // no transformation for videos
+      ? [] // No transformation for videos
       : [{ width: 800, height: 800, crop: "limit" }]
   })
 });
 
-const upload = multer({ storage });
+// ✅ 4MB limit (applies to all files)
+const upload = multer({
+  storage,
+  limits: { fileSize: 4 * 1024 * 1024 }, // 4MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "video/mp4"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Unsupported file type"), false);
+    }
+  }
+});
+
 export default upload;
