@@ -4,13 +4,16 @@ import cloudinary from "../utils/cloudinary.js";
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
+  params: async (req, file) => ({
     folder: "glitzzera_jewelry",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [{ width: 800, height: 800, crop: "limit" }],
-  },
+    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4"],
+    public_id: `${Date.now()}-${file.originalname}`,
+    resource_type: file.mimetype.startsWith("video") ? "video" : "image",
+    transformation: file.mimetype.startsWith("video")
+      ? [] // no transformation for videos
+      : [{ width: 800, height: 800, crop: "limit" }]
+  })
 });
 
 const upload = multer({ storage });
-
 export default upload;
