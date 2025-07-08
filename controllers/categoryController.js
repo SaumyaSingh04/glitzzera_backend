@@ -4,15 +4,25 @@ import Category from "../models/category.js";
 export const createCategory = async (req, res) => {
   try {
     const { catname, status } = req.body;
+
+    // 🔍 Check for duplicate category name
+    const existing = await Category.findOne({ catname });
+    if (existing) {
+      return res.status(400).json({ message: "Category with this name already exists" });
+    }
+
+    // 📦 Get uploaded image URL
     const imageUrl = req.file?.path || null;
 
+    // ✅ Create new category
     const category = await Category.create({
       catname,
-      status,
+      status: status !== undefined ? status : true,
       image: imageUrl,
     });
 
     res.status(201).json({ message: "Category created", category });
+
   } catch (error) {
     res.status(500).json({ message: "Failed to create category", error: error.message });
   }

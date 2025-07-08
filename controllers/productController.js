@@ -65,26 +65,39 @@ export const getProductById = async (req, res) => {
 
 // Update Product
 export const updateProduct = async (req, res) => {
-  try {
-    const updateData = { ...req.body };
-
-    if (req.files?.images) {
-      updateData.images = req.files.images.map((file) => file.path);
+    try {
+      const { id } = req.params;
+      const existingProduct = await Product.findById(id);
+  
+      if (!existingProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+  
+      const updateData = { ...req.body };
+  
+      // Append new images to existing ones
+      if (req.files?.images) {
+        const newImages = req.files.images.map((file) => file.path);
+        updateData.images = [...existingProduct.images, ...newImages];
+      } else {
+        updateData.images = existingProduct.images;
+      }
+  
+      // Update video if provided
+      if (req.files?.video?.[0]) {
+        updateData.video = req.files.video[0].path;
+      } else {
+        updateData.video = existingProduct.video;
+      }
+  
+      const updated = await Product.findByIdAndUpdate(id, updateData, { new: true });
+  
+      res.status(200).json({ message: "Product updated (images appended)", product: updated });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update product", error: error.message });
     }
-
-    if (req.files?.video?.[0]) {
-      updateData.video = req.files.video[0].path;
-    }
-
-    const updated = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
-
-    if (!updated) return res.status(404).json({ message: "Product not found" });
-
-    res.status(200).json({ message: "Product updated", product: updated });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to update product", error: error.message });
-  }
-};
+  };
+  
 
 // Delete Product
 export const deleteProduct = async (req, res) => {

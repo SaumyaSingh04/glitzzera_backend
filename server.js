@@ -18,7 +18,7 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // ✅ Needed for form-data fields
+app.use(express.urlencoded({ extended: true })); // Needed for form-data fields
 
 // DB Connection
 connectDB();
