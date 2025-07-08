@@ -8,9 +8,9 @@ import {
 
 const router = express.Router();
 
-router.post("/", addAddress);                    // ➕ Add new address
-router.get("/:userId", getAddressesByUser);      // 📥 Get addresses for user
-router.put("/:id", updateAddress);               // ✏️ Update address by ID
-router.delete("/:id", deleteAddress);            // ❌ Delete address by ID
+router.post("/", addAddress);                    
+router.get("/:userId", getAddressesByUser);     
+router.put("/:id", updateAddress);               
+router.delete("/:id", deleteAddress);            
 
 export default router;

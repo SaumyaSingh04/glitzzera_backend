@@ -4,6 +4,7 @@ import cors from "cors";
 import {connectDB} from "./db/connectDB.js";
 import userRoutes from "./routes/userRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
+import categoryRoutes from "./routes/categoryRoute.js";
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,7 @@ connectDB();
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/addresses", addressRoutes);
+app.use("/api/categories", categoryRoutes);
 
 app.use("/", (req, res) => {
   res.send("API working");
