@@ -13,7 +13,7 @@ const router = express.Router();
 router.post(
   "/",
   upload.fields([
-    { name: "images" },         
+    { name: "images", maxCount: 4 },         
     { name: "video", maxCount: 1 }
   ]),
   createProduct
