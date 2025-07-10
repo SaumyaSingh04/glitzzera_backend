@@ -11,8 +11,8 @@ const couponSchema = new mongoose.Schema({
   couponCode: {
     type: String,
     required: true,
-    unique: true, // ensures no duplicate codes
-    uppercase: true, // auto converts to capital
+    unique: true, 
+    uppercase: true, 
     trim: true,
   },
   amount: {
