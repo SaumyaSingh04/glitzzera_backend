@@ -95,6 +95,8 @@ export const updateProduct = async (req, res) => {
       const newImages = req.files.images.map((file) => file.path);
       const combinedImages = [...existingProduct.images, ...newImages];
       updateData.images = combinedImages.slice(0, 4); // keep only first 4
+      console.log("🖼️ Images received:", req.files?.images);
+
     } else {
       updateData.images = existingProduct.images;
     }
