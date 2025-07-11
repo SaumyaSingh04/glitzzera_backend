@@ -90,13 +90,19 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // Handle images (max 4 allowed in total)
+    // Handle images (replace last image(s) if new images are uploaded)
     if (req.files?.images) {
       const newImages = req.files.images.map((file) => file.path);
-      const combinedImages = [...existingProduct.images, ...newImages];
-      updateData.images = combinedImages.slice(0, 4); // keep only first 4
-      console.log("🖼️ Images received:", req.files?.images);
+      let existingImages = existingProduct.images || [];
 
+      const spaceLeft = 4 - newImages.length;
+      if (spaceLeft < 0) {
+        return res.status(400).json({ message: "Too many new images. Maximum 4 allowed." });
+      }
+
+      // Keep only as many old images as we can
+      existingImages = existingImages.slice(0, spaceLeft);
+      updateData.images = [...existingImages, ...newImages];
     } else {
       updateData.images = existingProduct.images;
     }
@@ -112,10 +118,10 @@ export const updateProduct = async (req, res) => {
 
     res.status(200).json({ message: "Product updated", product: updated });
   } catch (error) {
+    console.error("❌ Update error:", error);
     res.status(500).json({ message: "Failed to update product", error: error.message });
   }
 };
-
 
 
 // ✅ Delete Product
