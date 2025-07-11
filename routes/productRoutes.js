@@ -24,7 +24,7 @@ router.get("/:id", getProductById);
 router.put(
   "/:id",
   upload.fields([
-    { name: "images" },
+    { name: "images", maxCount: 4 },
     { name: "video", maxCount: 1 }
   ]),
   updateProduct
