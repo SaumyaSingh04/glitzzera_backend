@@ -90,10 +90,11 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // Handle images
+    // Handle images (max 4 allowed in total)
     if (req.files?.images) {
       const newImages = req.files.images.map((file) => file.path);
-      updateData.images = [...existingProduct.images, ...newImages];
+      const combinedImages = [...existingProduct.images, ...newImages];
+      updateData.images = combinedImages.slice(0, 4); // keep only first 4
     } else {
       updateData.images = existingProduct.images;
     }
@@ -112,6 +113,7 @@ export const updateProduct = async (req, res) => {
     res.status(500).json({ message: "Failed to update product", error: error.message });
   }
 };
+
 
 
 // ✅ Delete Product
