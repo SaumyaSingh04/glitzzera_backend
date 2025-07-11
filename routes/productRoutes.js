@@ -6,6 +6,7 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  removeSingleProductImage,
 } from "../controllers/productController.js";
 
 const router = express.Router();
@@ -29,6 +30,8 @@ router.put(
   ]),
   updateProduct
 );
+router.put("/remove-image/:id", removeSingleProductImage);
+
 router.delete("/:id", deleteProduct);
 
 export default router;
