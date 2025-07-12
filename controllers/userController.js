@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import Order from "../models/order.js";
 import Wishlist from "../models/wishlist.js";
+import Product from "../models/productModel.js"; 
 
 // Register
 export const registerUser = async (req, res) => {
@@ -51,25 +52,38 @@ export const loginUser = async (req, res) => {
 
 export const getAllUsersWithDetails = async (req, res) => {
   try {
-    const users = await User.find().select("-password"); // remove password for security
+    const users = await User.find().select("-password");
 
     const usersWithDetails = await Promise.all(
       users.map(async (user) => {
-        const orders = await Order.find({ user: user._id }).populate("products.productId", "shortTitle price");
-        const wishlist = await Wishlist.findOne({ user: user._id }).populate("items", "shortTitle price");
+        // ✅ Orders by userId
+        const orders = await Order.find({ userId: user._id })
+          .populate("products.productId", "shortTitle price images")
+          .populate("addressId", "name street city pincode phone")
+          .lean();
+
+        // ✅ Wishlist: collect productIds for this user
+        const wishlistEntries = await Wishlist.find({ userId: user._id }).lean();
+
+        const productIds = wishlistEntries.map((entry) => entry.productId);
+        const wishlistProducts = await Product.find({ _id: { $in: productIds } }).select("shortTitle price images");
 
         return {
           user,
-          orders,
-          wishlist: wishlist?.items || [],
+          orders: orders || [],
+          wishlist: wishlistProducts || [],
         };
       })
     );
 
-    res.status(200).json({ count: usersWithDetails.length, users: usersWithDetails });
+    res.status(200).json({
+      count: usersWithDetails.length,
+      users: usersWithDetails,
+    });
   } catch (error) {
-    console.error("❌ Error fetching all user data:", error);
+    console.error("❌ Error fetching user data:", error);
     res.status(500).json({ message: "Failed to fetch user data", error: error.message });
   }
 };
+
 
