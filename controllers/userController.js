@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import Order from "../models/order.js";
 import Wishlist from "../models/wishlist.js";
-import Product from "../models/productModel.js"; 
+import Product from "../models/product.js"; 
 
 // Register
 export const registerUser = async (req, res) => {
