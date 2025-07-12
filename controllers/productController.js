@@ -53,8 +53,8 @@ export const getProducts = async (req, res) => {
       .sort({ createdAt: -1 });
 
     const totalCount = products.length;
-    const activeCount = products.filter(p => p.status === "active").length;
-    const inactiveCount = products.filter(p => p.status !== "active").length;
+    const activeCount = products.filter(p => p.status === "true").length;
+    const inactiveCount = products.filter(p => p.status !== "true").length;
     const lowStockCount = products.filter(p => p.stockQty <= 5).length;
 
     res.status(200).json({
