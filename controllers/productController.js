@@ -45,13 +45,25 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// ✅ Get All Products
+// ✅ Get All Products with stats
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find()
-      .populate("category", "catname") // populate category name
+      .populate("category", "catname")
       .sort({ createdAt: -1 });
-    res.status(200).json(products);
+
+    const totalCount = products.length;
+    const activeCount = products.filter(p => p.status === "active").length;
+    const inactiveCount = products.filter(p => p.status !== "active").length;
+    const lowStockCount = products.filter(p => p.stockQty <= 5).length;
+
+    res.status(200).json({
+      products,
+      totalCount,
+      activeCount,
+      inactiveCount,
+      lowStockCount,
+    });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch products", error: error.message });
   }
