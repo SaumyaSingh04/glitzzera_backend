@@ -56,16 +56,16 @@ export const getProducts = async (req, res) => {
     const inactiveCount = products.filter(p => p.status !== true).length;
 
     const lowStockCount = products.filter(p => {
-      const baseQty = p.stockQty || 0;
-      const sizesQty = p.sizes?.reduce((sum, s) => sum + (s.stockQty || 0), 0) || 0;
-      const totalQty = baseQty + sizesQty;
-      return totalQty <= 5;
+      const totalQty =
+        (p.stockQty || 0) +
+        (Array.isArray(p.sizes) ? p.sizes.reduce((sum, s) => sum + (s.stockQty || 0), 0) : 0);
+      return totalQty > 0 && totalQty <= 5;
     }).length;
 
     const outOfStockCount = products.filter(p => {
-      const baseQty = p.stockQty || 0;
-      const sizesQty = p.sizes?.reduce((sum, s) => sum + (s.stockQty || 0), 0) || 0;
-      const totalQty = baseQty + sizesQty;
+      const totalQty =
+        (p.stockQty || 0) +
+        (Array.isArray(p.sizes) ? p.sizes.reduce((sum, s) => sum + (s.stockQty || 0), 0) : 0);
       return totalQty === 0;
     }).length;
 
@@ -81,7 +81,6 @@ export const getProducts = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch products", error: error.message });
   }
 };
-
 
 // ✅ Get Product by ID
 export const getProductById = async (req, res) => {
