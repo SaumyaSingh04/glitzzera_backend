@@ -45,7 +45,6 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// ✅ Get All Products with stats
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find()
@@ -55,7 +54,20 @@ export const getProducts = async (req, res) => {
     const totalCount = products.length;
     const activeCount = products.filter(p => p.status === true).length;
     const inactiveCount = products.filter(p => p.status !== true).length;
-    const lowStockCount = products.filter(p => p.stockQty <= 5).length;
+
+    const lowStockCount = products.filter(p => {
+      const baseQty = p.stockQty || 0;
+      const sizesQty = p.sizes?.reduce((sum, s) => sum + (s.stockQty || 0), 0) || 0;
+      const totalQty = baseQty + sizesQty;
+      return totalQty <= 5;
+    }).length;
+
+    const outOfStockCount = products.filter(p => {
+      const baseQty = p.stockQty || 0;
+      const sizesQty = p.sizes?.reduce((sum, s) => sum + (s.stockQty || 0), 0) || 0;
+      const totalQty = baseQty + sizesQty;
+      return totalQty === 0;
+    }).length;
 
     res.status(200).json({
       products,
@@ -63,6 +75,7 @@ export const getProducts = async (req, res) => {
       activeCount,
       inactiveCount,
       lowStockCount,
+      outOfStockCount,
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch products", error: error.message });
