@@ -53,22 +53,17 @@ export const getProducts = async (req, res) => {
 
     const totalCount = products.length;
     const activeCount = products.filter(p => p.status === true).length;
-    const inactiveCount = products.filter(p => p.status !== true).length;
+    const inactiveCount = totalCount - activeCount;
 
     let lowStockCount = 0;
     let outOfStockCount = 0;
 
     products.forEach(product => {
-      // ✅ Use ONLY sizes[].stockQty — ignore product.stockQty
-      const sizeStock = Array.isArray(product.sizes)
-        ? product.sizes.reduce((sum, s) => sum + (s.stockQty || 0), 0)
-        : 0;
+      const stock = product.stockQty || 0;
 
-      const totalQty = sizeStock;
-
-      if (totalQty === 0) {
+      if (stock === 0) {
         outOfStockCount++;
-      } else if (totalQty <= 5) {
+      } else if (stock > 0 && stock <= 5) {
         lowStockCount++;
       }
     });
@@ -88,7 +83,6 @@ export const getProducts = async (req, res) => {
     });
   }
 };
-
 
 // ✅ Get Product by ID
 export const getProductById = async (req, res) => {
