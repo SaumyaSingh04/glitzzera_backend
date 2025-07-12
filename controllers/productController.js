@@ -59,15 +59,18 @@ export const getProducts = async (req, res) => {
     let outOfStockCount = 0;
 
     products.forEach(product => {
-      const mainStock = product.stockQty || 0;
+      // ✅ Use ONLY sizes[].stockQty — ignore product.stockQty
       const sizeStock = Array.isArray(product.sizes)
-        ? product.sizes.reduce((sum, size) => sum + (size.stockQty || 0), 0)
+        ? product.sizes.reduce((sum, s) => sum + (s.stockQty || 0), 0)
         : 0;
 
-      const totalQty = mainStock + sizeStock;
+      const totalQty = sizeStock;
 
-      if (totalQty === 0) outOfStockCount++;
-      else if (totalQty > 0 && totalQty <= 5) lowStockCount++;
+      if (totalQty === 0) {
+        outOfStockCount++;
+      } else if (totalQty <= 5) {
+        lowStockCount++;
+      }
     });
 
     res.status(200).json({
