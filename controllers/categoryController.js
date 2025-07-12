@@ -88,32 +88,29 @@ export const deleteCategory = async (req, res) => {
 };
 
 
-export const getCategoryImageStats = async (req, res) => {
+export const getCategoryStats = async (req, res) => {
   try {
-    // Fetch categories
     const categories = await Category.find();
 
-    // Loop through each category and count images
-    const result = await Promise.all(
-      categories.map(async (cat) => {
-        const products = await Product.find({ category: cat._id });
-        const imageCount = products.reduce((acc, product) => {
-          return acc + (product.images?.length || 0);
-        }, 0);
+    const stats = [];
 
-        return {
-          catname: cat.catname,
-          categoryId: cat._id,
-          imageCount,
-        };
-      })
-    );
+    for (const cat of categories) {
+      const productCount = await Product.countDocuments({ category: cat._id });
 
-    res.status(200).json(result);
+      stats.push({
+        categoryId: cat._id,
+        catname: cat.catname,
+        productCount,
+      });
+    }
+
+    res.status(200).json(stats);
   } catch (error) {
     res.status(500).json({
-      message: "Failed to fetch image count per category",
+      message: "Failed to fetch category stats",
       error: error.message,
     });
   }
 };
+
+
