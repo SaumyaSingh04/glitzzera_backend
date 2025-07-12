@@ -1,4 +1,6 @@
 import User from "../models/userModel.js";
+import Order from "../models/order.js";
+import Wishlist from "../models/wishlist.js";
 
 // Register
 export const registerUser = async (req, res) => {
@@ -46,3 +48,28 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: "Login failed", error: error.message });
   }
 };
+
+export const getAllUsersWithDetails = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); // remove password for security
+
+    const usersWithDetails = await Promise.all(
+      users.map(async (user) => {
+        const orders = await Order.find({ user: user._id }).populate("products.productId", "shortTitle price");
+        const wishlist = await Wishlist.findOne({ user: user._id }).populate("items", "shortTitle price");
+
+        return {
+          user,
+          orders,
+          wishlist: wishlist?.items || [],
+        };
+      })
+    );
+
+    res.status(200).json({ count: usersWithDetails.length, users: usersWithDetails });
+  } catch (error) {
+    console.error("❌ Error fetching all user data:", error);
+    res.status(500).json({ message: "Failed to fetch user data", error: error.message });
+  }
+};
+
