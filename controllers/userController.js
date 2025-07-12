@@ -53,37 +53,33 @@ export const loginUser = async (req, res) => {
 export const getAllUsersWithDetails = async (req, res) => {
   try {
     const users = await User.find().select("-password");
+    console.log(`Found ${users.length} users.`);
 
-    const usersWithDetails = await Promise.all(
-      users.map(async (user) => {
-        // ✅ Orders by userId
-        const orders = await Order.find({ userId: user._id })
-          .populate("products.productId", "shortTitle price images")
-          .populate("addressId", "name street city pincode phone")
-          .lean();
+    const detailedUsers = await Promise.all(users.map(async (user) => {
+      console.log("→ User:", user._id, user.email);
 
-        // ✅ Wishlist: collect productIds for this user
-        const wishlistEntries = await Wishlist.find({ userId: user._id }).lean();
+      const orders = await Order.find({ userId: user._id })
+        .populate("products.productId", "shortTitle price")
+        .lean();
+      console.log("Orders found:", orders.length);
 
-        const productIds = wishlistEntries.map((entry) => entry.productId);
-        const wishlistProducts = await Product.find({ _id: { $in: productIds } }).select("shortTitle price images");
+      const wishlistItems = await Wishlist.find({ userId: user._id })
+        .populate("productId", "shortTitle price")
+        .lean();
+      console.log("Wishlist items found:", wishlistItems.length);
 
-        return {
-          user,
-          orders: orders || [],
-          wishlist: wishlistProducts || [],
-        };
-      })
-    );
+      return { user, orders, wishlistItems };
+    }));
 
-    res.status(200).json({
-      count: usersWithDetails.length,
-      users: usersWithDetails,
-    });
-  } catch (error) {
-    console.error("❌ Error fetching user data:", error);
-    res.status(500).json({ message: "Failed to fetch user data", error: error.message });
+    console.log("Finished gathering data:", detailedUsers.length);
+    return res.status(200).json({ count: detailedUsers.length, detailedUsers });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching full details", error: err.message });
   }
 };
+
+
 
 
