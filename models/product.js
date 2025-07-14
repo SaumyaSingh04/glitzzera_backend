@@ -14,6 +14,7 @@ const productSchema = new mongoose.Schema(
     ratings: { type: Number, default: 0 },
     stockQty: { type: Number, default: 0 },
     is_oos: { type: Boolean, default: false },
+    isNewCollection: { type: Boolean, default: false },
 
     // ✅ Category reference
     category: {

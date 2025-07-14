@@ -208,3 +208,26 @@ export const getProductsByCategoryId = async (req, res) => {
     });
   }
 };
+
+// ✅ Toggle isNewCollection
+export const toggleNewCollection = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    product.isNewCollection = !product.isNewCollection;
+    await product.save();
+
+    res.status(200).json({
+      message: `isNewCollection toggled to ${product.isNewCollection}`,
+      product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to toggle isNewCollection",
+      error: error.message,
+    });
+  }
+};
