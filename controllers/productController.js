@@ -231,3 +231,24 @@ export const toggleNewCollection = async (req, res) => {
     });
   }
 };
+
+// ✅ Get Products by Category Name (like "ring", "necklace")
+export const getProductsByCategoryName = async (req, res) => {
+  try {
+    const { catname } = req.params;
+
+    // Step 1: Find the category by name
+    const category = await Category.findOne({ catname: { $regex: new RegExp(`^${catname}$`, "i") } });
+
+    if (!category) {
+      return res.status(404).json({ message: `Category '${catname}' not found` });
+    }
+
+    // Step 2: Find products linked to this category
+    const products = await Product.find({ category: category._id }).populate("category", "catname");
+
+    res.status(200).json({ catname, products });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch products by category name", error: error.message });
+  }
+};

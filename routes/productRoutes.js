@@ -8,7 +8,8 @@ import {
   deleteProduct,
   removeSingleProductImage,
   getProductsByCategoryId,
-  toggleNewCollection
+  toggleNewCollection,
+  getProductsByCategoryName
 } from "../controllers/productController.js";
 
 const router = express.Router();
@@ -36,6 +37,7 @@ router.put("/remove-image/:id", removeSingleProductImage);
 
 router.delete("/:id", deleteProduct);
 router.get("/by-category/:categoryId", getProductsByCategoryId);
+router.get("/by-category-name/:catname", getProductsByCategoryName);
 router.put("/toggle-new-collection/:id", toggleNewCollection);
 
 
