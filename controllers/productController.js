@@ -48,7 +48,20 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find()
+    const { search } = req.query;
+
+    let query = {};
+
+    if (search) {
+      query = {
+        $or: [
+          { shortTitle: { $regex: search, $options: "i" } },
+          { longTitle: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
+    const products = await Product.find(query)
       .populate("category", "catname")
       .sort({ createdAt: -1 });
 
@@ -61,12 +74,8 @@ export const getProducts = async (req, res) => {
 
     products.forEach(product => {
       const stock = product.stockQty || 0;
-
-      if (stock === 0) {
-        outOfStockCount++;
-      } else if (stock > 0 && stock <= 5) {
-        lowStockCount++;
-      }
+      if (stock === 0) outOfStockCount++;
+      else if (stock <= 5) lowStockCount++;
     });
 
     res.status(200).json({
